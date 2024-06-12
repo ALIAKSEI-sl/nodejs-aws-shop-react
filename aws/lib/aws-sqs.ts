@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { CfnOutput, RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy, aws_cloudfront, aws_iam } from "aws-cdk-lib";
 import { Distribution, PriceClass, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
@@ -21,13 +21,22 @@ export class Sqs extends Construct {
   }
 
   private createBucket(): Bucket {
-    return new Bucket(this, "shopReactBucket", {
+    const oai = new aws_cloudfront.OriginAccessIdentity(this, 'CloudFront.OriginAccessIdentity');
+    const bucket = new Bucket(this, "shopReactBucket", {
       versioned: true,
       autoDeleteObjects: true,
       bucketName: "aws-shop-react-rs-cdk",
       removalPolicy: RemovalPolicy.DESTROY,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
+
+    bucket.addToResourcePolicy(new aws_iam.PolicyStatement({
+      actions:["S3:GetObject"],
+      resources: [bucket.arnForObjects("*")],
+      principals: [new aws_iam.CanonicalUserPrincipal(oai.cloudFrontOriginAccessIdentityS3CanonicalUserId)]
+    }))
+
+    return bucket;
   }
 
   private createDistribution(bucket: Bucket): Distribution {
