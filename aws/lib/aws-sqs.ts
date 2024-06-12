@@ -12,7 +12,7 @@ export class Sqs extends Construct {
     this.init();
   }
 
-  private init() {
+  private init(): void {
     const bucket = this.createBucket();
     const distribution = this.createDistribution(bucket);
 
