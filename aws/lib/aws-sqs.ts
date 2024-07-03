@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { CfnOutput, RemovalPolicy, aws_cloudfront, aws_iam } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy, aws_cloudfront, aws_iam, Duration } from "aws-cdk-lib";
 import { Distribution, PriceClass, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
@@ -49,7 +49,14 @@ export class Sqs extends Construct {
       priceClass: PriceClass.PRICE_CLASS_100,
       errorResponses: [
         {
+          httpStatus: 403,
+          ttl: Duration.seconds(0),
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+        },
+        {
           httpStatus: 404,
+          ttl: Duration.seconds(0),
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
         },
